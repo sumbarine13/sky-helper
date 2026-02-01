@@ -2,44 +2,21 @@ import os
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+from flask import Flask
+from threading import Thread
 
-# Load token from .env file
+# =========================
+# Load token securely
+# =========================
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 if not TOKEN:
-    raise ValueError("Bot token not found. Put it inside .env file.")
+    raise ValueError("DISCORD_TOKEN not set")
 
-# Secure intents (only what we need)
-intents = discord.Intents.default()
-intents.message_content = True
-
-bot = commands.Bot(
-    command_prefix="!",
-    intents=intents,
-    help_command=None
-)
-
-@bot.event
-async def on_ready():
-    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
-    print("Bot is ready!")
-
-@bot.command(name="sumbarine")
-async def sumbarine(ctx: commands.Context):
-    message = (
-        "💀THE GOAT OF SERVER 💀\n"
-        "😈ULTRA SIGMA OG😈\n"
-        "EXCELLENT EXTREMELY HIGHLY TRUST🤑\n"
-        "LIKE OG 🤑\n"
-        "❤️CO OWNER ❤️\n"
-        "high respect from everyone\n"
-        "Sumbarine!"
-    )
-    await ctx.send(message)
-    from flask import Flask
-from threading import Thread
-
+# =========================
+# Web server (keeps Render alive)
+# =========================
 app = Flask(__name__)
 
 @app.route("/")
@@ -51,4 +28,34 @@ def run_web():
 
 Thread(target=run_web).start()
 
+# =========================
+# Discord bot setup
+# =========================
+intents = discord.Intents.default()
+intents.message_content = True
+
+bot = commands.Bot(
+    command_prefix="!",
+    intents=intents
+)
+
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user}")
+
+@bot.command(name="sumbarine")
+async def sumbarine(ctx):
+    await ctx.send(
+        "💀THE GOAT OF SERVER 💀\n"
+        "😈ULTRA SIGMA OG😈\n"
+        "EXCELLENT EXTREMELY HIGHLY TRUST🤑\n"
+        "LIKE OG 🤑\n"
+        "❤️CO OWNER ❤️\n"
+        "high respect from everyone\n"
+        "Sumbarine!"
+    )
+
+# =========================
+# Start bot
+# =========================
 bot.run(TOKEN)
